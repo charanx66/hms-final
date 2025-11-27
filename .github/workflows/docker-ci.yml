@@ -1,0 +1,29 @@
+name: Docker CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    services:
+      mongo:
+        image: mongo:6.0
+        ports:
+          - 27017:27017
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+      - name: Build and run backend
+        run: |
+          docker build -t backend ./server
+          docker run -d --name backend -p 8000:8000 --env-file .env backend
+      - name: Build and run frontend
+        run: |
+          docker build -t frontend ./client
+          docker run -d --name frontend -p 3000:3000 frontend
